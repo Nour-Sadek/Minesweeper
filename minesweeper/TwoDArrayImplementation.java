@@ -3,7 +3,6 @@ package minesweeper;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.Scanner;
-import minesweeper.Main;
 
 public class TwoDArrayImplementation {
     static Random random = new Random();
@@ -29,16 +28,52 @@ public class TwoDArrayImplementation {
             }
         }
 
-        // Print the mineField
-        printMineField(mineField);
+        // Add hints to the mineField
+        String[][] mineFieldWithHints = includeHints(mineField);
+        printMineField(mineFieldWithHints);
     }
 
     public static void printMineField(String[][] mineField) {
+        for (String[] row : mineField) {
+            for (String column : row) System.out.print(column);
+            System.out.println();
+        }
+    }
+
+    public static String[][] includeHints(String[][] mineField) {
+        String[][] output = new String[mineField.length][mineField.length];
+
         for (int i = 0; i < mineField.length; i++) {
             for (int j = 0; j < mineField[i].length; j++) {
-                System.out.print(mineField[i][j]);
+
+                // Don't check surrounding cells if this cell contains a MINE
+                if (mineField[i][j].equals(Main.MINE)) {
+                    output[i][j] = Main.MINE;
+                    continue;
+                }
+
+                // Determine the number of MINEs that surround this cell
+                int numOfSurroundingMines = 0;
+                for (int row = i - 1; row <= i + 1; row++) {
+                    for (int col = j - 1; col <= j + 1; col++) if (hasMine(mineField, row, col)) numOfSurroundingMines++;
+                }
+
+                // Adding SAFE "." if cell has no surrounding MINEs, or the number otherwise
+                if (numOfSurroundingMines == 0) {
+                    output[i][j] = Main.SAFE;
+                } else {
+                    output[i][j] = Integer.toString(numOfSurroundingMines);
+                }
             }
-            System.out.println();
+        }
+        return output;
+    }
+
+    public static boolean hasMine(String[][] mineField, int i, int j) throws ArrayIndexOutOfBoundsException {
+        try {
+            return mineField[i][j].equals("X");
+        } catch (ArrayIndexOutOfBoundsException e) {
+            return false;
         }
     }
 }
