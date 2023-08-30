@@ -34,6 +34,18 @@ public class Main {
         ArrayList<String> clonedField = (ArrayList) field.clone();
 
         // Replace the values in the clone array
+        insertHintsToField(clonedField);
+
+        // Add them to randomField String to output on console adding \n after 9 cells
+        for (int i = 1; i <= clonedField.size(); i++) {
+            randomField += clonedField.get(i - 1);
+            if (i % Main.GRID == 0) randomField += "\n";
+        }
+
+        System.out.print(randomField);
+    }
+
+    public static void insertHintsToField(ArrayList<String> field) {
         ArrayList<Integer> leftSide = new ArrayList<Integer>();
         for (int i = 1; i <= Main.GRID - 2; i++) {
             leftSide.add(i * Main.GRID);
@@ -43,7 +55,6 @@ public class Main {
         for (int i = 2; i <= Main.GRID - 1; i++) {
             rightSide.add((i * Main.GRID) - 1);
         }
-
 
         for (int i = 0; i < Math.pow(Main.GRID, 2); i++) {
             int numOfSurroundingMines = 0;
@@ -109,20 +120,11 @@ public class Main {
                 temp.add(i + Main.GRID);
                 temp.add(i + Main.GRID - 1);
                 temp.add(i + Main.GRID + 1);
-
             }
 
             // Update clonedField if at least one mine surrounds current cell
             for (int nearbyCell: temp) if (field.get(nearbyCell).equals("X")) numOfSurroundingMines++;
-            if (numOfSurroundingMines != 0) clonedField.set(i, Integer.toString(numOfSurroundingMines));
+            if (numOfSurroundingMines != 0) field.set(i, Integer.toString(numOfSurroundingMines));
         }
-
-        // Add them to randomField String to output on console adding \n after 9 cells
-        for (int i = 1; i <= clonedField.size(); i++) {
-            randomField += clonedField.get(i - 1);
-            if (i % Main.GRID == 0) randomField += "\n";
-        }
-
-        System.out.print(randomField);
     }
 }
