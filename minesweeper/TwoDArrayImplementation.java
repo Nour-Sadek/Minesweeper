@@ -17,8 +17,13 @@ public class TwoDArrayImplementation {
         // Create the mineField
         String[][] mineField = new String[Main.GRID][Main.GRID];
 
-        // Fill in the 2D array with the default SAFE cell
-        for (String[] strings : mineField) Arrays.fill(strings, Main.SAFE);
+        // Fill in the 2D array with the default UNEXPLORED cell
+        for (String[] strings : mineField) Arrays.fill(strings, Main.UNEXPLORED);
+        // Create a clone of mineField before modifying it to include hints and mines
+        String[][] gameMineField = new String[Main.GRID][Main.GRID];
+        for (int row = 0; row < mineField.length; row++) {
+            gameMineField[row] = mineField[row].clone();
+        }
 
         // Randomly replacing SAFE cells in the mineField with required number of MINEs
         while (numMinesInserted < numMines) {
@@ -32,37 +37,60 @@ public class TwoDArrayImplementation {
         }
 
         // Add hints to the mineField
-        String[][] mineFieldWithHints = includeHints(mineField);
-        // Hide the location of MINEs
-        String[][] hiddenMineField = hideMines(mineFieldWithHints);
-        // Print the mineField with MINEs hidden
-        printMineFieldWithGrid(hiddenMineField);
-        // Replace MINEs with MARKED in <mineFieldWithHints>
-        String[][] exposedMineField = replaceMinesWithMarked(mineFieldWithHints);
+        String[][] filledMineField = includeHints(mineField);
+        // Display empty minefield
+        printMineFieldWithGrid(gameMineField);
+        boolean keepGoing = false;
 
-        // Let the user play the game!
-        while (!Arrays.deepEquals(exposedMineField, hiddenMineField)) {
-            // Get correct user input
-            int[] userInput = gettingUserInput();
-            int col = userInput[0] - 1;
-            int row = userInput[1] - 1;
+        while (true) {
+            // Collect correct user input
+            String[] userInput = gettingUserInput();
+            int col = Integer.parseInt(userInput[0]) - 1;
+            int row = Integer.parseInt(userInput[1]) - 1;
+            String command = userInput[2];
 
-            // Mark user input on the minefield
-            if (hiddenMineField[row][col].equals(Main.SAFE)) {
-                hiddenMineField[row][col] = Main.MARKED;
-            } else if (hiddenMineField[row][col].equals(Main.MARKED)) {
-                hiddenMineField[row][col] = Main.SAFE;
-            } else {
-                System.out.println("There is a number here!");
-                continue;
+            // Update gameFieldMine accordingly
+            switch (command) {
+                case Main.MINE_COMMAND -> {
+                    if (gameMineField[row][col].equals(Main.UNEXPLORED)) {
+                        gameMineField[row][col] = Main.UNEXPLORED_MARKED;
+                        printMineFieldWithGrid(gameMineField);
+                    } else if (gameMineField[row][col].equals(Main.UNEXPLORED_MARKED)) {
+                        gameMineField[row][col] = Main.UNEXPLORED;
+                        printMineFieldWithGrid(gameMineField);
+                    } else {
+                        System.out.println("Can't mark a cell that has been explored!");
+                    }
+                }
+                case Main.FREE_COMMAND -> {
+                    // Check if this cell has a mine
+                    if (filledMineField[row][col].equals(Main.MINE)) {
+                        // Print the game minefield with location of mines shown
+                        fillGameFieldWithMine(filledMineField, gameMineField);
+                        printMineFieldWithGrid(gameMineField);
+                        // Alert the user that they have failed
+                        System.out.println("You stepped on a mine and failed!");
+                        keepGoing = true;
+                    } else {
+                        ArrayList<String> possibleCoordinates = possibleCoordinates();
+                        ArrayList<String> possibleNumbers = new ArrayList<>();
+                        for (int i = 1; i <= 8; i++) possibleNumbers.add(Integer.toString(i));
+                        exploreNearbyCells(possibleNumbers, possibleCoordinates, filledMineField, gameMineField, row, col);
+                        printMineFieldWithGrid(gameMineField);
+                    }
+                }
             }
 
-            // Print the modified minefield
-            printMineFieldWithGrid(hiddenMineField);
-        }
+            if (keepGoing) break;
 
-        // If while loop breaks, that means user has guessed the location of the MINEs correctly
-        System.out.println("Congratulations! You found all the mines!");
+            // Checking if the user won because they exposed all the mines or explored all the safe cells
+            if (numMinesExposed(filledMineField, gameMineField) == numMines || countUnexplored(gameMineField) == numMines) {
+                printMineFieldWithGrid(gameMineField);
+                System.out.println("Congratulations! You found all the mines!");
+                break;
+            }
+
+        }
     }
 
     @Deprecated
@@ -74,28 +102,33 @@ public class TwoDArrayImplementation {
         }
     }
 
-    public static int[] gettingUserInput() {
-        // Determining possible x and u coordinate values
-        ArrayList<String> possibleCoordinates = new ArrayList<>();
-        for (int i = 1; i <= Main.GRID; i++) possibleCoordinates.add(Integer.toString(i));
+    public static String[] gettingUserInput() {
+        // Determining possible x and y coordinate values
+        ArrayList<String> possibleCoordinates = possibleCoordinates();
 
         // Checking for valid user input
         while (true) {
-            System.out.println("Set/delete mines marks (x and y coordinates):");
-            String userInput = scanner.nextLine();
+            System.out.println("Set/unset mines marks or claim a cell as free:");
+            String[] userInput = scanner.nextLine().split(" ");
 
-            if (userInput.length() != 3 || !Character.toString(userInput.charAt(1)).equals(" ")) {
-                System.out.println("Wrong Input! Please input two one-digit numbers separated by one space.");
+            if (userInput.length != 3) {
+                System.out.println("Wrong Input! Please input two numbers and a command, either 'free' or 'mine', with one space between each input.");
             } else {
-                String x = String.valueOf(userInput.charAt(0));
-                String y = String.valueOf(userInput.charAt(2));
+                String x = userInput[0];
+                String y = userInput[1];
+                String command = userInput[2];
 
                 if (!possibleCoordinates.contains(x) || !possibleCoordinates.contains(y)) {
-                    System.out.println("x and y coordinates must be valid numbers that refer to a position on the mine field.");
+                    System.out.println("x and y coordinates must be valid numbers that refer to a position on the minefield.");
                     continue;
                 }
 
-                return new int[] {Integer.parseInt(x), Integer.parseInt(y)};
+                if (!command.equals(Main.MINE_COMMAND) && !command.equals(Main.FREE_COMMAND)) {
+                    System.out.println("Wrong command. Allowed commands are: free, mine");
+                    continue;
+                }
+
+                return new String[] {x, y, command};
             }
         }
     }
@@ -125,6 +158,7 @@ public class TwoDArrayImplementation {
         System.out.println("|");
     }
 
+    @Deprecated
     public static String[][] hideMines(String[][] mineField) {
         String[][] output = new String[mineField.length][mineField.length];
 
@@ -138,13 +172,14 @@ public class TwoDArrayImplementation {
         return output;
     }
 
+    @Deprecated
     public static String[][] replaceMinesWithMarked(String[][] mineField) {
         String[][] output = new String[mineField.length][mineField.length];
 
         for (int i = 0; i < mineField.length; i++) {
             for (int j = 0; j < mineField[i].length; j++) {
                 if (mineField[i][j].equals(Main.MINE)) {
-                    output[i][j] = Main.MARKED;
+                    output[i][j] = Main.UNEXPLORED_MARKED;
                 } else {
                     output[i][j] = mineField[i][j];
                 }
@@ -174,7 +209,7 @@ public class TwoDArrayImplementation {
 
                 // Adding SAFE "." if cell has no surrounding MINEs, or the number otherwise
                 if (numOfSurroundingMines == 0) {
-                    output[i][j] = Main.SAFE;
+                    output[i][j] = Main.UNEXPLORED;
                 } else {
                     output[i][j] = Integer.toString(numOfSurroundingMines);
                 }
@@ -189,5 +224,76 @@ public class TwoDArrayImplementation {
         } catch (ArrayIndexOutOfBoundsException e) {
             return false;
         }
+    }
+
+    public static ArrayList<String> possibleCoordinates() {
+        ArrayList<String> coordinates = new ArrayList<>();
+        for (int i = 1; i <= Main.GRID; i++) coordinates.add(Integer.toString(i));
+        return coordinates;
+    }
+
+    public static void exploreNearbyCells(ArrayList<String> possibleNumbers, ArrayList<String> possibleCoordinates, String[][] filledMineField, String[][] gameMineField, int row, int col) {
+        // Return if impossible coordinates
+        if (!possibleCoordinates.contains(String.valueOf(row + 1)) || !possibleCoordinates.contains(String.valueOf(col + 1))) return;
+
+        // Return if explored, looking at gameMineField (has Main.EXPLORED or a number)
+        if (gameMineField[row][col].equals(Main.EXPLORED_FREE) || possibleNumbers.contains(gameMineField[row][col])) return;
+
+        // Update gameMineField if cell is Main.UNEXPLORED in filledMineField
+        if (filledMineField[row][col].equals(Main.UNEXPLORED)) gameMineField[row][col] = Main.EXPLORED_FREE;
+
+        // Update gameMineField if number is encountered
+        if (possibleNumbers.contains(filledMineField[row][col])) {
+            gameMineField[row][col] = filledMineField[row][col];
+            return;
+        }
+
+        // Return if encountered Main.MINE
+        if (filledMineField[row][col].equals(Main.MINE)) return;
+
+        // Recursively check all other nearby cells
+        exploreNearbyCells(possibleNumbers, possibleCoordinates, filledMineField, gameMineField, row - 1, col);
+        exploreNearbyCells(possibleNumbers, possibleCoordinates, filledMineField, gameMineField, row - 1, col - 1);
+        exploreNearbyCells(possibleNumbers, possibleCoordinates, filledMineField, gameMineField, row - 1, col + 1);
+        exploreNearbyCells(possibleNumbers, possibleCoordinates, filledMineField, gameMineField, row + 1, col);
+        exploreNearbyCells(possibleNumbers, possibleCoordinates, filledMineField, gameMineField, row + 1, col - 1);
+        exploreNearbyCells(possibleNumbers, possibleCoordinates, filledMineField, gameMineField, row + 1, col + 1);
+        exploreNearbyCells(possibleNumbers, possibleCoordinates, filledMineField, gameMineField, row, col - 1);
+        exploreNearbyCells(possibleNumbers, possibleCoordinates, filledMineField, gameMineField, row, col + 1);
+
+    }
+
+    public static void fillGameFieldWithMine(String[][] filledMineField, String[][] gameMineField) {
+        for (int i = 0; i < filledMineField.length; i++) {
+            for (int j = 0; j < filledMineField.length; j++) {
+                if (filledMineField[i][j].equals(Main.MINE)) gameMineField[i][j] = Main.MINE;
+            }
+        }
+    }
+
+    public static int numMinesExposed(String[][] filledMineField, String[][] gameMineField) {
+        int correctNumMinesExposed = 0;
+
+        for (int i = 0; i < filledMineField.length; i++) {
+            for (int j = 0; j < filledMineField.length; j++) {
+                if (filledMineField[i][j].equals(Main.MINE)) {
+                    if (gameMineField[i][j].equals(Main.UNEXPLORED_MARKED)) correctNumMinesExposed++;
+                }
+            }
+        }
+
+        return correctNumMinesExposed;
+    }
+
+    public static int countUnexplored(String[][] gameMineField) {
+        int numUnexplored = 0;
+
+        for (int i = 0; i < gameMineField.length; i++) {
+            for (int j = 0; j < gameMineField.length; j++) {
+                if (gameMineField[i][j].equals(Main.UNEXPLORED)) numUnexplored++;
+            }
+        }
+
+        return numUnexplored;
     }
 }
