@@ -10,8 +10,7 @@ public class TwoDArrayImplementation {
     static Scanner scanner = new Scanner(System.in);
     public static void main(String[] args) {
         // Get the number of mines
-        System.out.println("How many mines do you want on the field?");
-        int numMines = scanner.nextInt();
+        int numMines = getNumberOfMines();
         int numMinesInserted = 0;
 
         // Create the mineField
@@ -295,5 +294,27 @@ public class TwoDArrayImplementation {
         }
 
         return numUnexplored;
+    }
+
+    public static int getNumberOfMines() {
+        while (true) {
+            System.out.println("How many mines do you want on the field?");
+            String userInput = scanner.nextLine();
+            if (!userInput.matches("[0-9]+")) {
+                System.out.println("Invalid input! Please provide a single number.\n");
+            } else {
+                int numMines = Integer.parseInt(userInput);
+                if (numMines >= (Main.GRID * Main.GRID)) {
+                    System.out.println("Please don't input more mines than there are cells!\n"
+                    + "The game will be played on a " + Main.GRID + "x" + Main.GRID
+                    + " grid.\n Maximum allowed of mines is " + (Main.GRID * Main.GRID - 1) + ".\n"
+                    + "Minimum allowed of mines is 1.\n");
+                } else if (numMines == 0) {
+                    System.out.println("Please insert at least one mine!\n");
+                } else {
+                    return numMines;
+                }
+            }
+        }
     }
 }
