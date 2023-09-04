@@ -283,7 +283,16 @@ public class TwoDArrayImplementation {
             }
         }
 
-        return correctNumMinesExposed;
+        // Determine the number of mines marked in gameMineField
+        int numUnexploredMarked = 0;
+
+        for (int i = 0; i < gameMineField.length; i++) {
+            for (int j = 0; j < gameMineField.length; j++) {
+                if (gameMineField[i][j].equals(Main.UNEXPLORED_MARKED)) numUnexploredMarked++;
+            }
+        }
+
+        return (numUnexploredMarked == correctNumMinesExposed) ? correctNumMinesExposed : 0;
     }
 
     public static int numSafesExposed(String[][] filledMineField, String[][] gameMineField) {
