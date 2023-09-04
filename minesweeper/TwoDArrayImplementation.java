@@ -83,14 +83,16 @@ public class TwoDArrayImplementation {
             if (keepGoing) break;
 
             // Checking if the user won because they exposed all the mines or explored all the safe cells
-            if (numMinesExposed(filledMineField, gameMineField) == numMines || countUnexplored(gameMineField) == numMines) {
-                printMineFieldWithGrid(gameMineField);
+            if (numMinesExposed(filledMineField, gameMineField) == numMines
+                    || numSafesExposed(filledMineField, gameMineField) == (Main.GRID * Main.GRID) - numMines) {
                 System.out.println("Congratulations! You found all the mines!");
                 break;
             }
 
         }
     }
+
+    // countUnexplored(gameMineField) == numMines)
 
     @Deprecated
     public static void printMineField(String[][] mineField) {
@@ -284,6 +286,22 @@ public class TwoDArrayImplementation {
         return correctNumMinesExposed;
     }
 
+    public static int numSafesExposed(String[][] filledMineField, String[][] gameMineField) {
+        int correctNumSafesExposed = 0;
+
+        for (int i = 0; i < filledMineField.length; i++) {
+            for (int j = 0; j < filledMineField.length; j++) {
+                if (!filledMineField[i][j].equals(Main.MINE)) {
+                    if (!gameMineField[i][j].equals(Main.UNEXPLORED_MARKED)
+                            && !gameMineField[i][j].equals(Main.UNEXPLORED)) correctNumSafesExposed++;
+                }
+            }
+        }
+
+        return correctNumSafesExposed;
+    }
+
+    @Deprecated
     public static int countUnexplored(String[][] gameMineField) {
         int numUnexplored = 0;
 
@@ -307,7 +325,7 @@ public class TwoDArrayImplementation {
                 if (numMines >= (Main.GRID * Main.GRID)) {
                     System.out.println("Please don't input more mines than there are cells!\n"
                     + "The game will be played on a " + Main.GRID + "x" + Main.GRID
-                    + " grid.\n Maximum allowed of mines is " + (Main.GRID * Main.GRID - 1) + ".\n"
+                    + " grid.\nMaximum allowed of mines is " + (Main.GRID * Main.GRID - 1) + ".\n"
                     + "Minimum allowed of mines is 1.\n");
                 } else if (numMines == 0) {
                     System.out.println("Please insert at least one mine!\n");
