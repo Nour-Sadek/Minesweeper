@@ -200,3 +200,5 @@ Project was built using java version 8 update 381
 
 Download the minesweeper repository to your machine. Create a new project in IntelliJ IDEA, then move the downloaded 
 minesweeper repository to the src folder, then run the minesweeper.TwoDArrayImplementation java class.
+The minesweeper.Main java class won't run the program as it is incomplete, however its presence is needed as final variables 
+are defined in it.

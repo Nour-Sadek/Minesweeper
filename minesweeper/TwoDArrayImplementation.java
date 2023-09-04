@@ -113,19 +113,19 @@ public class TwoDArrayImplementation {
             String[] userInput = scanner.nextLine().split(" ");
 
             if (userInput.length != 3) {
-                System.out.println("Wrong Input! Please input two numbers and a command, either 'free' or 'mine', with one space between each input.");
+                System.out.println("Wrong Input! Please input two numbers and a command, either 'free' or 'mine', with one space between each input.\n");
             } else {
                 String x = userInput[0];
                 String y = userInput[1];
                 String command = userInput[2];
 
                 if (!possibleCoordinates.contains(x) || !possibleCoordinates.contains(y)) {
-                    System.out.println("x and y coordinates must be valid numbers that refer to a position on the minefield.");
+                    System.out.println("x and y coordinates must be valid numbers that refer to a position on the minefield.\n");
                     continue;
                 }
 
                 if (!command.equals(Main.MINE_COMMAND) && !command.equals(Main.FREE_COMMAND)) {
-                    System.out.println("Wrong command. Allowed commands are: free, mine");
+                    System.out.println("Wrong command. Allowed commands are: free, mine\n");
                     continue;
                 }
 
