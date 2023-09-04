@@ -12,7 +12,11 @@ public class Main {
     static Random random = new Random();
     static Scanner scanner = new Scanner(System.in);
     static final String MINE = "X";
-    static final String SAFE = ".";
+    static final String UNEXPLORED = ".";
+    static final String UNEXPLORED_MARKED = "*";
+    static final String EXPLORED_FREE = "/";
+    static final String FREE_COMMAND = "free";
+    static final String MINE_COMMAND = "mine";
 
     public static void main(String[] args) {
         System.out.println("How many mines do you want on the field?");
@@ -25,7 +29,7 @@ public class Main {
 
         // Fill the field list with total number of safe and mine cells
         for (int i = 0; i < numMines; i++) field.add(Main.MINE);
-        for (int i = 0; i < numSafes; i++) field.add(Main.SAFE);
+        for (int i = 0; i < numSafes; i++) field.add(Main.UNEXPLORED);
 
         // Randomize the field list
         Collections.shuffle(field, Main.random);
