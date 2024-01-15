@@ -33,7 +33,7 @@ The symbols that represent each cell's state are:
 - / as explored free cells without mines around it
 - Numbers from 1 to 8 as explored free cells with 1 to 8 mines around them, respectively
 - X as mines
-- * as unexplored marked cells
+- \* as unexplored marked cells
 
 Below is a possible run of the program:
 
