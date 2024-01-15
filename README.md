@@ -33,7 +33,7 @@ The symbols that represent each cell's state are:
 - / as explored free cells without mines around it
 - Numbers from 1 to 8 as explored free cells with 1 to 8 mines around them, respectively
 - X as mines
-- \* as unexplored marked cells
+- * as unexplored marked cells
 
 Below is a possible run of the program:
 
@@ -191,14 +191,11 @@ HyperSkill describes each of its four available difficulty levels:
 This repository contains:
 
     minesweeper package
-        - Contains the minesweeper.Main java class that contains the first stage of the program (incomplete).
-        - Contains the minesweeper.TwoDArrayImplementation java class that contains the complete implementation of the program.
+        - Contains the minesweeper.Main java class that contains the complete implementation of the program.
 
 Project was built using java version 8 update 381
 
 # How to Run
 
 Download the minesweeper repository to your machine. Create a new project in IntelliJ IDEA, then move the downloaded 
-minesweeper repository to the src folder, then run the minesweeper.TwoDArrayImplementation java class.
-The minesweeper.Main java class won't run the program as it is incomplete, however its presence is needed as final variables 
-are defined in it.
+minesweeper repository to the src folder, then run the minesweeper.Main java class.
